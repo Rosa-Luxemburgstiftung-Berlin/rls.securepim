@@ -1,0 +1,14 @@
+# vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
+---
+
+# path to the directory holding the required packages
+# if the path is relative, it will be searched in the ansible playbook context
+rls_securepim_gateway_files_dir: securepim/sgw/
+
+rls_securepim_gateway_required_packages:
+  - libpcsclite1
+
+# the target cfg file
+rls_securepim_gateway_cfg: /etc/sera-gateway/sgw-server-config.json
+
+...
