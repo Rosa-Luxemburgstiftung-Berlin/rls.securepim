@@ -57,8 +57,10 @@
 - name: register changed results
   ansible.builtin.set_fact:
     _rls_sgw_restart: true
-  with_items: "{{ _sgw_deb_libs.results + _sgw_deb.results }}"
   when: item.changed
+  with_items: "{{ _sgw_deb_libs.results + _sgw_deb.results }}"
+  loop_control:
+    label: "{{ item.item | basename }} {{ item.changed }}"
 
 - name: debug registered _rls_sgw_restart
   ansible.builtin.debug:
