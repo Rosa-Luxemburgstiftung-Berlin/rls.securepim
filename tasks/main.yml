@@ -1,0 +1,67 @@
+# vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
+---
+
+- name: install required packages
+  ansible.builtin.apt:
+    name: "{{ rls_securepim_gateway_required_packages }}"
+    update_cache: true
+
+- name: register debian packages to install
+  ansible.builtin.set_fact:
+    _rls_sgw_deb_files: "{{ lookup('fileglob', rls_securepim_gateway_files_dir ~ '*.deb', wantlist=true) }}"
+
+- name: debug debian packages to install
+  ansible.builtin.debug:
+    var: _rls_sgw_deb_files
+    verbosity: 1
+
+- name: copy debian packages
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/var/tmp/{{ item | basename }}"
+    mode: 0600
+    owner: root
+    group: root
+  with_items: "{{ _rls_sgw_deb_files }}"
+
+
+# hackish way to get around dpkg/ansible issue
+# https://github.com/ansible/ansible-modules-core/issues/1178
+# and install libs first
+- name: install debian packages - libs
+  ansible.builtin.apt:
+    deb: "/var/tmp/{{ item | basename }}"
+  with_items: "{{ _rls_sgw_deb_files }}"
+  when: (item | basename).startswith('lib')
+  register: _sgw_deb_libs
+  #notify: restart sera-gateway
+
+- name: debug registered _sgw_deb_libs
+  ansible.builtin.debug:
+    var: _sgw_deb_libs
+    verbosity: 1
+
+- name: install debian packages - finish
+  ansible.builtin.apt:
+    deb: "/var/tmp/{{ item | basename }}"
+  with_items: "{{ _rls_sgw_deb_files }}"
+  when: not (item | basename).startswith('lib')
+  register: _sgw_deb
+  #notify: restart sera-gateway
+
+- name: debug registered _sgw_deb
+  ansible.builtin.debug:
+    var: _sgw_deb
+    verbosity: 1
+
+- name: register changed results
+  ansible.builtin.set_fact:
+    _rls_sgw_restart: true
+  with_items: "{{ _sgw_deb_libs.results + _sgw_deb.results }}"
+  when: item.changed
+
+- name: debug registered _rls_sgw_restart
+  ansible.builtin.debug:
+    var: _rls_sgw_restart
+
+...
