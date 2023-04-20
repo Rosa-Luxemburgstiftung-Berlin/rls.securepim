@@ -65,5 +65,11 @@
 - name: debug registered _rls_sgw_restart
   ansible.builtin.debug:
     var: _rls_sgw_restart
+    verbosity: 1
+
+- name: "ensure sera-gateway service status is {{ _rls_sgw_restart | default(false) | bool | ternary('restarted', 'started') }}"
+  ansible.builtin.service:
+    name: sera-gateway
+    state: "{{ _rls_sgw_restart | default(false) | bool | ternary('restarted', 'started') }}"
 
 ...
