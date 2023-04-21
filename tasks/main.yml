@@ -54,7 +54,7 @@
     var: _sgw_deb
     verbosity: 1
 
-- name: register changed results
+- name: register changed results  # noqa no-handler
   ansible.builtin.set_fact:
     _rls_sgw_restart: true
   when: item.changed
