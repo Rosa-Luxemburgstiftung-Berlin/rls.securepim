@@ -54,11 +54,37 @@
     var: _sgw_deb
     verbosity: 1
 
+- name: ensure dirs exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ rls_securepim_seragateway_user }}"
+    group: "{{ rls_securepim_seragateway_user }}"
+    mode: "0700"
+  with_items:
+    - /etc/sera-gateway
+    - /var/lib/sera-gateway
+    - /var/lib/sera-gateway/data
+
+- name: copy files to /etc/sera-gateway
+  ansible.builtin.copy:
+    src: "{{ rls_securepim_gateway_files_dir }}{{ item }}/"
+    dest: "{{ item }}/"
+    owner: "{{ rls_securepim_seragateway_user }}"
+    group: "{{ rls_securepim_seragateway_user }}"
+    mode: "0600"
+    directory_mode: "0700"
+  register: _sgw_files
+  with_items:
+    - /etc/sera-gateway
+    - /var/lib/sera-gateway
+    - /var/lib/sera-gateway/data
+
 - name: register changed results  # noqa no-handler
   ansible.builtin.set_fact:
     _rls_sgw_restart: true
   when: item.changed
-  with_items: "{{ _sgw_deb_libs.results + _sgw_deb.results }}"
+  with_items: "{{ _sgw_deb_libs.results + _sgw_deb.results + _sgw_files.results }}"
   loop_control:
     label: "{{ item.item | basename }} {{ item.changed }}"
 
