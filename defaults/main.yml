@@ -1,14 +1,23 @@
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2 smartindent nu ft=yaml
 ---
 
+# TODO: please define your token / setup-key here
+rls_securepim_gateway_gw_token: ""
+
+# untested! define the proxy settings
+rls_securepim_gateway_gw_proxy:
+  gw_proxy_conf: false  # set this to true
+  gw_proxy_host: ""
+  gw_proxy_user: ""
+  gw_proxy_password: ""
+  gw_proxy_exceptions: ""
+
 # path to the directory holding the required packages
 # if the path is relative, it will be searched in the ansible playbook context
 rls_securepim_gateway_files_dir: securepim/sgw/
 
 rls_securepim_gateway_required_packages:
+  - debconf
   - libpcsclite1
-
-# the target cfg file
-rls_securepim_gateway_cfg: /etc/sera-gateway/sgw-server-config.json
 
 ...

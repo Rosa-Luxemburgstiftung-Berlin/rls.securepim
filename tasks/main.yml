@@ -6,6 +6,31 @@
     name: "{{ rls_securepim_gateway_required_packages }}"
     update_cache: true
 
+- name: pressed gw_token
+  ansible.builtin.debconf:
+    name: "sera-gateway"
+    question: "sera-gateway/gw_token"
+    value: "{{ rls_securepim_gateway_gw_token }}"
+    vtype: "string"
+  no_log: true
+
+- name: disable pressed gw_proxy
+  ansible.builtin.debconf:
+    name: "sera-gateway"
+    question: "sera-gateway/gw_proxy_conf"
+    value: "false"
+    vtype: "boolean"
+  when: not (rls_securepim_gateway_gw_proxy.gw_proxy_conf | default(false) | bool)
+
+- name: pressed gw_proxy
+  ansible.builtin.debconf:
+    name: "sera-gateway"
+    question: "sera-gateway/{{ item.key }}"
+    value: "{{ item.value }}"
+    vtype: "{% if item.key == 'gw_proxy_conf' %}boolean{% elif item.key == 'gw_proxy_password' %}password{% else %}string{% endif %}"
+  no_log: true
+  when: rls_securepim_gateway_gw_proxy.gw_proxy_conf | bool
+
 - name: register debian packages to install
   ansible.builtin.set_fact:
     _rls_sgw_deb_files: "{{ lookup('fileglob', rls_securepim_gateway_files_dir ~ '*.deb', wantlist=true) }}"
@@ -24,7 +49,6 @@
     group: root
   with_items: "{{ _rls_sgw_deb_files }}"
 
-
 # hackish way to get around dpkg/ansible issue
 # https://github.com/ansible/ansible-modules-core/issues/1178
 # and install libs first
@@ -34,7 +58,6 @@
   with_items: "{{ _rls_sgw_deb_files }}"
   when: (item | basename).startswith('lib')
   register: _sgw_deb_libs
-  #notify: restart sera-gateway
 
 - name: debug registered _sgw_deb_libs
   ansible.builtin.debug:
@@ -47,7 +70,6 @@
   with_items: "{{ _rls_sgw_deb_files }}"
   when: not (item | basename).startswith('lib')
   register: _sgw_deb
-  #notify: restart sera-gateway
 
 - name: debug registered _sgw_deb
   ansible.builtin.debug:
