@@ -11,6 +11,4 @@ rls_securepim_gateway_required_packages:
 # the target cfg file
 rls_securepim_gateway_cfg: /etc/sera-gateway/sgw-server-config.json
 
-# sera-gateway user
-rls_securepim_seragateway_user: seragateway
 ...
