@@ -1,5 +1,5 @@
 # rls.securepim
-secure pim ansible playbook
+ansible playbook to setup [https://www.virtual-solution.com/](secure pim gateway)
 
 ## prereq
 
